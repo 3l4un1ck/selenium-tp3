@@ -4,7 +4,7 @@ pipeline {
             stage('Checkout') {
                 steps {
                     echo 'Checking out repository...'
-                    git 'https://github.com/3l4un1ck/selenium-tp3.git'
+                    git branch: 'main', url: 'https://github.com/3l4un1ck/selenium-tp3.git'
                 }
             }
 
