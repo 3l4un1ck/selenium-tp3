@@ -8,6 +8,19 @@ pipeline {
             }
         }
 
+        stage('Clean Docker Environment') {
+            steps {
+                echo 'Cleaning up old Docker containers, networks, and images...'
+                sh '''
+                    docker-compose down -v --remove-orphans || true
+                    docker rm -f $(docker ps -aq) 2>/dev/null || true
+                    docker rmi -f $(docker images -q selenium-tp3-app) 2>/dev/null || true
+                    docker network prune -f || true
+                    docker volume prune -f || true
+                '''
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
                 echo 'Building Docker image...'
