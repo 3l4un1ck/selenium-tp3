@@ -30,6 +30,13 @@ pipeline {
             }
         }
 
+        stage('Coverage Report') {
+            steps {
+                echo 'Running pytest with coverage in Docker...'
+                sh 'docker run --rm -v $PWD/htmlcov:/app/htmlcov selenium-tp3-app pytest --cov=. --cov-report=html'
+            }
+        }
+
         stage('Functional Tests') {
             steps {
                 echo 'Running Selenium tests in Docker...'
@@ -53,6 +60,7 @@ pipeline {
     post {
         always {
             archiveArtifacts artifacts: 'reports/*.html', fingerprint: true
+            archiveArtifacts artifacts: 'htmlcov/**', fingerprint: true
             echo 'Stopping and removing Docker containers...'
             sh 'docker-compose down || true'
         }
