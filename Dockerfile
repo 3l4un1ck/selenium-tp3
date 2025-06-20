@@ -1,25 +1,29 @@
-FROM python:3.11-slim
+# Use Python 3.13 slim image as base
+FROM python:3.13-slim
 
-# Installer les dépendances système
-RUN apt-get update && \
-    apt-get install -y curl chromium-driver chromium && \
-    rm -rf /var/lib/apt/lists/*
-
-ENV PATH="/usr/local/bin:$PATH"
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-
+# Set working directory
 WORKDIR /app
 
-COPY . /app
-
-# Installer les dépendances Python
-RUN pip install --upgrade pip && pip install -r requirements.txt
-
-# Variables d’environnement Flask
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 ENV FLASK_APP=app.py
-ENV FLASK_RUN_HOST=0.0.0.0
+ENV FLASK_ENV=development
 
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy project files
+COPY . .
+
+# Expose port
 EXPOSE 5000
 
-CMD ["flask", "run"]
+# Command to run the application
+CMD ["flask", "run", "--host=0.0.0.0"]
