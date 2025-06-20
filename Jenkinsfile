@@ -34,6 +34,13 @@ pipeline {
             }
         }
 
+        stage('Install Dependencies') {
+            steps {
+                echo 'Running pytest to install dependencies...'
+                sh 'pytest --cov=todo tests/ --junitxml=test-results.xml '
+            }
+        }
+
         // stage('Unit Tests') {
         //     steps {
         //         echo 'Running unit tests with Pytest...'
