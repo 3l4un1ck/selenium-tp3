@@ -1,10 +1,5 @@
-Flask
-Flask-SQLAlchemy
-Flask-Login
-Werkzeug
+flask
+flask_sqlalchemy
 pytest
-pytest-cov
-pytest-html
-pytest-selenium
 selenium
-gunicorn
+pytest-html
