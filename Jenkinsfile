@@ -36,8 +36,10 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
+                echo 'Installing Python dependencies...'
+                sh 'docker run --rm -v "$PWD":/app -w /app selenium-tp3-app pip install -r requirements.txt'
                 echo 'Running pytest to install dependencies...'
-                sh 'pytest --cov=todo tests/ --junitxml=test-results.xml '
+                sh 'docker run --rm -v "$PWD":/app -w /app selenium-tp3-app pytest --cov=todo tests/ --junitxml=test-results.xml '
             }
         }
 
