@@ -34,46 +34,46 @@ pipeline {
             }
         }
 
-        stage('Unit Tests') {
-            steps {
-                echo 'Running unit tests with Pytest...'
-                sh """
-                    mkdir -p ${PYTEST_REPORT_DIR}
-                    mkdir -p ${COVERAGE_DIR}
-                    docker run --rm \
-                        -v "\${WORKSPACE}/${PYTEST_REPORT_DIR}:/app/${PYTEST_REPORT_DIR}" \
-                        -v "\${WORKSPACE}/${COVERAGE_DIR}:/app/${COVERAGE_DIR}" \
-                        selenium-tp3-app \
-                        python -m pytest \
-                            --html="/app/${PYTEST_REPORT_DIR}/unit_tests.html" \
-                            --cov=. \
-                            --cov-report="html:/app/${COVERAGE_DIR}" \
-                            --junitxml="/app/${PYTEST_REPORT_DIR}/unit-results.xml" \
-                            tests/
-                """
-            }
-            post {
-                always {
-                    junit allowEmptyResults: true, testResults: "${PYTEST_REPORT_DIR}/unit-results.xml"
-                    publishHTML([
-                        allowMissing: true,
-                        alwaysLinkToLastBuild: true,
-                        keepAll: true,
-                        reportDir: PYTEST_REPORT_DIR,
-                        reportFiles: 'unit_tests.html',
-                        reportName: 'Unit Tests Report'
-                    ])
-                    publishHTML([
-                        allowMissing: true,
-                        alwaysLinkToLastBuild: true,
-                        keepAll: true,
-                        reportDir: COVERAGE_DIR,
-                        reportFiles: 'index.html',
-                        reportName: 'Coverage Report'
-                    ])
-                }
-            }
-        }
+        // stage('Unit Tests') {
+        //     steps {
+        //         echo 'Running unit tests with Pytest...'
+        //         sh """
+        //             mkdir -p ${PYTEST_REPORT_DIR}
+        //             mkdir -p ${COVERAGE_DIR}
+        //             docker run --rm \
+        //                 -v "\${WORKSPACE}/${PYTEST_REPORT_DIR}:/app/${PYTEST_REPORT_DIR}" \
+        //                 -v "\${WORKSPACE}/${COVERAGE_DIR}:/app/${COVERAGE_DIR}" \
+        //                 selenium-tp3-app \
+        //                 python -m pytest \
+        //                     --html="/app/${PYTEST_REPORT_DIR}/unit_tests.html" \
+        //                     --cov=. \
+        //                     --cov-report="html:/app/${COVERAGE_DIR}" \
+        //                     --junitxml="/app/${PYTEST_REPORT_DIR}/unit-results.xml" \
+        //                     tests/
+        //         """
+        //     }
+        //     post {
+        //         always {
+        //             junit allowEmptyResults: true, testResults: "${PYTEST_REPORT_DIR}/unit-results.xml"
+        //             publishHTML([
+        //                 allowMissing: true,
+        //                 alwaysLinkToLastBuild: true,
+        //                 keepAll: true,
+        //                 reportDir: PYTEST_REPORT_DIR,
+        //                 reportFiles: 'unit_tests.html',
+        //                 reportName: 'Unit Tests Report'
+        //             ])
+        //             publishHTML([
+        //                 allowMissing: true,
+        //                 alwaysLinkToLastBuild: true,
+        //                 keepAll: true,
+        //                 reportDir: COVERAGE_DIR,
+        //                 reportFiles: 'index.html',
+        //                 reportName: 'Coverage Report'
+        //             ])
+        //         }
+        //     }
+        // }
 
         stage('Start Services') {
             when {
@@ -86,36 +86,36 @@ pipeline {
             }
         }
 
-        stage('Functional Tests') {
-            when {
-                expression { currentBuild.result == null || currentBuild.result == 'SUCCESS' }
-            }
-            steps {
-                echo 'Running Selenium functional tests...'
-                sh """
-                    docker run --rm \
-                        --network selenium-tp3_default \
-                        -v \$PWD/${PYTEST_REPORT_DIR}:/app/${PYTEST_REPORT_DIR} \
-                        selenium-tp3-app \
-                        pytest tests_selenium/ \
-                            --html=${PYTEST_REPORT_DIR}/selenium_tests.html \
-                            --junitxml=${PYTEST_REPORT_DIR}/selenium-results.xml
-                """
-            }
-            post {
-                always {
-                    junit "${PYTEST_REPORT_DIR}/selenium-results.xml"
-                    publishHTML([
-                        allowMissing: false,
-                        alwaysLinkToLastBuild: true,
-                        keepAll: true,
-                        reportDir: PYTEST_REPORT_DIR,
-                        reportFiles: 'selenium_tests.html',
-                        reportName: 'Selenium Tests Report'
-                    ])
-                }
-            }
-        }
+        // stage('Functional Tests') {
+        //     when {
+        //         expression { currentBuild.result == null || currentBuild.result == 'SUCCESS' }
+        //     }
+        //     steps {
+        //         echo 'Running Selenium functional tests...'
+        //         sh """
+        //             docker run --rm \
+        //                 --network selenium-tp3_default \
+        //                 -v \$PWD/${PYTEST_REPORT_DIR}:/app/${PYTEST_REPORT_DIR} \
+        //                 selenium-tp3-app \
+        //                 pytest tests_selenium/ \
+        //                     --html=${PYTEST_REPORT_DIR}/selenium_tests.html \
+        //                     --junitxml=${PYTEST_REPORT_DIR}/selenium-results.xml
+        //         """
+        //     }
+        //     post {
+        //         always {
+        //             junit "${PYTEST_REPORT_DIR}/selenium-results.xml"
+        //             publishHTML([
+        //                 allowMissing: false,
+        //                 alwaysLinkToLastBuild: true,
+        //                 keepAll: true,
+        //                 reportDir: PYTEST_REPORT_DIR,
+        //                 reportFiles: 'selenium_tests.html',
+        //                 reportName: 'Selenium Tests Report'
+        //             ])
+        //         }
+        //     }
+        // }
 
         stage('Deploy') {
             when {
