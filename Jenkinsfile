@@ -1,70 +1,70 @@
 pipeline {
     agent any
-        stages {
-            stage('Checkout') {
-                steps {
-                    echo 'Checking out repository...'
-                    git branch: 'main', url: 'https://github.com/3l4un1ck/selenium-tp3.git'
-                }
-            }
-
-            stage('Install Dependencies') {
-                steps {
-                    echo 'Installing dependencies...'
-                    sh 'pip3 install -r requirements.txt'
-                }
-            }
-
-            stage('Unit Tests') {
-                steps {
-                    echo 'Running unit tests...'
-                    sh 'pytest --html=reports/unit_tests.html'
-                }
-            }
-
-            stage('Build & Run App') {
-                steps {
-                    echo 'Building and running app...'
-                    sh 'nohup python app.py &'
-                    sh 'sleep 5'
-                }
-           }
-
-           stage('Functional Tests') {
+    stages {
+        stage('Checkout') {
             steps {
-                echo 'Running functional (Selenium) tests...'
-                sh 'pytest tests_selenium/ --html=reports/selenium_tests.html'
-               }
-           }
+                echo 'Checking out repository...'
+                git branch: 'main', url: 'https://github.com/3l4un1ck/selenium-tp3.git'
+            }
+        }
 
-          stage('Deploy (optionnel)') {
+        stage('Build Docker Image') {
             steps {
-                            echo 'Deploying application (optional)...'
-                            echo 'Déploiement réussi (ex. copie serveur, Docker, etc.)'
-                        }
-                    }
+                echo 'Building Docker image...'
+                sh 'docker build -t selenium-tp3-app .'
+            }
+        }
 
-                    stage('Notify') {
-                        steps {
-                            echo 'Sending notification (Slack, email, etc.)...'
-                            echo 'Envoi de notification possible (Slack, email, etc.)'
-                        }
-                    }
-                }
+        stage('Start Services') {
+            steps {
+                echo 'Starting app and Selenium with docker-compose...'
+                sh 'docker-compose up -d'
+                sh 'sleep 10'
+            }
+        }
 
-             post {
-                    always {
-                        archiveArtifacts artifacts: 'reports/*.html', fingerprint: true
-                    }
-                    failure {
-                        echo 'Build failed!'
-                    }
-                    success {
-                        emailext (
-                            subject: "Jenkins Build Success: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                            body: "Good news! The build succeeded.\n\nCheck details at: ${env.BUILD_URL}",
-                            to: 'your_email@example.com'
-                        )
-                    }
-                }
+        stage('Unit Tests') {
+            steps {
+                echo 'Running unit tests in Docker...'
+                sh 'docker run --rm -v $PWD/reports:/app/reports selenium-tp3-app pytest --html=reports/unit_tests.html'
+            }
+        }
+
+        stage('Functional Tests') {
+            steps {
+                echo 'Running Selenium tests in Docker...'
+                sh 'docker run --rm --network selenium-tp3_default -v $PWD/reports:/app/reports selenium-tp3-app pytest tests_selenium/ --html=reports/selenium_tests.html'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                echo 'Deploying application (Docker Compose keeps app running)...'
+            }
+        }
+
+        stage('Notify') {
+            steps {
+                echo 'Sending notification (Slack, email, etc.)...'
+            }
+        }
+    }
+
+    post {
+        always {
+            archiveArtifacts artifacts: 'reports/*.html', fingerprint: true
+            echo 'Stopping and removing Docker containers...'
+            sh 'docker-compose down || true'
+        }
+        failure {
+            echo 'Build failed!'
+        }
+        success {
+            emailext (
+                subject: "Jenkins Build Success: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: "Good news! The build succeeded.\n\nCheck details at: ${env.BUILD_URL}",
+                to: 'm.toho@ecoles-epsi.net'
+            )
+        }
+    }
 }
