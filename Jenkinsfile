@@ -39,7 +39,7 @@ pipeline {
                 echo 'Installing Python dependencies...'
                 sh 'docker run --rm -v "$PWD":/app -w /app selenium-tp3-app pip install -r requirements.txt'
                 echo 'Running pytest...'
-                sh 'docker run --rm -v "$PWD":/app -w /app selenium-tp3-app pytest tests/'
+                sh 'docker run --rm -v "$PWD":/app -w /app -e PYTHONPATH=/app selenium-tp3-app pytest tests/'
             }
         }
 
