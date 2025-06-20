@@ -8,6 +8,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
+# Set PYTHONPATH so Python can find the app module
+ENV PYTHONPATH=/app
+
 # Run unit tests and coverage
 RUN pytest --cov=. --cov-report=html
 
