@@ -1,6 +1,7 @@
 import pytest
 from app.models import User
-from services.auth_service import authenticate_user, perform_logout
+from app.services.auth_service import authenticate_user, perform_logout
+
 
 def test_authenticate_user_success(mocker, client):
     user = User(username='test')
