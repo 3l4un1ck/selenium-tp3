@@ -52,7 +52,7 @@ pipeline {
                     }
                 }
 
-                post {
+             post {
                     always {
                         archiveArtifacts artifacts: 'reports/*.html', fingerprint: true
                     }
@@ -67,4 +67,4 @@ pipeline {
                         )
                     }
                 }
-            }
+}
