@@ -36,38 +36,45 @@ pipeline {
             }
         }
 
-        stage('Unit Tests') {
+        stage('Run Tests') {
             steps {
-                echo 'Running unit tests in Docker...'
-                sh 'docker run --rm -v $PWD/reports:/app/reports selenium-tp3-app pytest --html=reports/unit_tests.html'
+                echo 'Running tests with execute.sh...'
+                sh 'chmod +x execute.sh && ./execute.sh'
             }
         }
 
-        stage('Coverage Report') {
-            steps {
-                echo 'Running pytest with coverage in Docker...'
-                sh 'docker run --rm -v $PWD/htmlcov:/app/htmlcov selenium-tp3-app pytest --cov=. --cov-report=html'
-            }
-        }
+        //stage('Unit Tests') {
+        //    steps {
+        //        echo 'Running unit tests in Docker...'
+        //        sh 'docker run --rm -v $PWD/reports:/app/reports selenium-tp3-app pytest --html=reports/unit_tests.html'
+        //    }
+        //}
+        //
+        //stage('Coverage Report') {
+        //    steps {
+        //        echo 'Running pytest with coverage in Docker...'
+        //        sh 'docker run --rm -v $PWD/htmlcov:/app/htmlcov selenium-tp3-app pytest --cov=. --cov-report=html'
+        //    }
+        //}
 
-        stage('Functional Tests') {
-            steps {
-                echo 'Running Selenium tests in Docker...'
-                sh 'docker run --rm --network selenium-tp3_default -v $PWD/reports:/app/reports selenium-tp3-app pytest tests_selenium/ --html=reports/selenium_tests.html'
-            }
-        }
+        //stage('Functional Tests') {
+        //    steps {
+        //        echo 'Running Selenium tests in Docker...'
+        //        sh 'docker run --rm --network selenium-tp3_default -v $PWD/reports:/app/reports selenium-tp3-app pytest tests_selenium/ --html=reports/selenium_tests.html'
+        //    }
+        //}
 
-        stage('Deploy') {
-            steps {
-                echo 'Deploying application (Docker Compose keeps app running)...'
-            }
-        }
-
-        stage('Notify') {
-            steps {
-                echo 'Sending notification (Slack, email, etc.)...'
-            }
-        }
+        //stage('Deploy') {
+        //    steps {
+        //        echo 'Deploying application (Docker Compose keeps app running)...'
+        //    }
+        //}
+        //
+        //stage('Notify') {
+        //    steps {
+        //        echo 'Sending notification (Slack, email, etc.)...'
+        //    }
+        //}
     }
 
     post {
