@@ -15,7 +15,7 @@ services:
 
   pytest:
     build: .
-    command: pytest tests/ --html=reports/unit_test_report.html
+    command: PYTHONPATH=/app pytest tests/ --html=reports/unit_test_report.html
     volumes:
       - .:/app
     depends_on:
