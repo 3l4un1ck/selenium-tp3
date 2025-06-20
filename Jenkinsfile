@@ -1,37 +1,45 @@
 pipeline {
     agent any
+
+    environment {
+        DOCKER_BUILDKIT = '1'
+    }
+
     stages {
         stage('Checkout') {
             steps {
-                echo 'Checking out repository...'
+                echo '📥 Cloning repository...'
                 git branch: 'main', url: 'https://github.com/3l4un1ck/selenium-tp3.git'
             }
         }
-        stage('Install') {
+
+        stage('Build & Test') {
             steps {
-                sh 'pip install -r requirements.txt'
+                echo '🚀 Running execute.sh...'
+                sh 'chmod +x ./execute.sh'
+                sh './execute.sh'
             }
         }
-        stage('Unit Tests') {
+
+        stage('Publish Reports') {
             steps {
-                sh 'pytest tests/ --html=reports/unit_test_report.html'
-            }
-        }
-        stage('Run App') {
-            steps {
-                sh 'python app.py &'
-                sleep(time: 5, unit: 'SECONDS')
-            }
-        }
-        stage('Functional Tests') {
-            steps {
-                sh 'pytest selenium_tests/ --html=reports/selenium_report.html'
+                echo '📝 Archiving reports...'
+                publishHTML (target: [
+                    allowMissing: true,
+                    alwaysLinkToLastBuild: true,
+                    keepAll: true,
+                    reportDir: 'reports',
+                    reportFiles: 'unit_test_report.html',
+                    reportName: 'Unit Test Report'
+                ])
             }
         }
     }
+
     post {
         always {
-            archiveArtifacts artifacts: 'reports/*.html', fingerprint: true
+            echo '🧹 Cleaning up...'
+            sh 'docker-compose down || true'
         }
     }
 }
