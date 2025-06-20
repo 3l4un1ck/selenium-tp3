@@ -39,22 +39,24 @@ pipeline {
                 echo 'Running unit tests with Pytest...'
                 sh """
                     mkdir -p ${PYTEST_REPORT_DIR}
+                    mkdir -p ${COVERAGE_DIR}
                     docker run --rm \
-                        -v \$PWD/${PYTEST_REPORT_DIR}:/app/${PYTEST_REPORT_DIR} \
-                        -v \$PWD/${COVERAGE_DIR}:/app/${COVERAGE_DIR} \
+                        -v "\${WORKSPACE}/${PYTEST_REPORT_DIR}:/app/${PYTEST_REPORT_DIR}" \
+                        -v "\${WORKSPACE}/${COVERAGE_DIR}:/app/${COVERAGE_DIR}" \
                         selenium-tp3-app \
-                        pytest \
-                            --html=${PYTEST_REPORT_DIR}/unit_tests.html \
+                        python -m pytest \
+                            --html="/app/${PYTEST_REPORT_DIR}/unit_tests.html" \
                             --cov=. \
-                            --cov-report=html \
-                            --junitxml=${PYTEST_REPORT_DIR}/unit-results.xml
+                            --cov-report="html:/app/${COVERAGE_DIR}" \
+                            --junitxml="/app/${PYTEST_REPORT_DIR}/unit-results.xml" \
+                            tests/
                 """
             }
             post {
                 always {
-                    junit "${PYTEST_REPORT_DIR}/unit-results.xml"
+                    junit allowEmptyResults: true, testResults: "${PYTEST_REPORT_DIR}/unit-results.xml"
                     publishHTML([
-                        allowMissing: false,
+                        allowMissing: true,
                         alwaysLinkToLastBuild: true,
                         keepAll: true,
                         reportDir: PYTEST_REPORT_DIR,
@@ -62,7 +64,7 @@ pipeline {
                         reportName: 'Unit Tests Report'
                     ])
                     publishHTML([
-                        allowMissing: false,
+                        allowMissing: true,
                         alwaysLinkToLastBuild: true,
                         keepAll: true,
                         reportDir: COVERAGE_DIR,

@@ -4,4 +4,7 @@ Flask-Login
 Werkzeug
 pytest
 pytest-cov
+pytest-html
+pytest-selenium
+selenium
 gunicorn
