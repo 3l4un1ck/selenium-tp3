@@ -59,6 +59,9 @@ pipeline {
 
     post {
         always {
+            echo '=== Publishing JUnit test results ==='
+            junit 'test-results.xml'
+
             archiveArtifacts artifacts: 'reports/*.html', fingerprint: true
             archiveArtifacts artifacts: 'htmlcov/**', fingerprint: true
             echo 'Stopping and removing Docker containers...'
